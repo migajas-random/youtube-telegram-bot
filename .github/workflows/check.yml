@@ -23,6 +23,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           UC_YOUTUBE: ${{ secrets.UC_YOUTUBE }}
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
         run: python check_video.py
 
       - name: Commit last_video.txt
