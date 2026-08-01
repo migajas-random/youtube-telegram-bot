@@ -20,6 +20,8 @@ params = {
 }
 resp = requests.get(search_url, params=params).json()
 
+print("RESPUESTA COMPLETA:", resp)
+
 video = None
 for item in resp.get("items", []):
     if item["snippet"]["liveBroadcastContent"] == "none":
