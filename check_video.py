@@ -1,22 +1,40 @@
-import feedparser
 import requests
 import os
-import json
 
+API_KEY = os.environ["YT_API_KEY"]
 CHANNEL_ID = os.environ["UC_YOUTUBE"]
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 CHAT_ID = "@migajasrandom"
 THREAD_ID = 4
 LAST_VIDEO_FILE = "last_video.txt"
 
-feed_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}"
-feed = feedparser.parse(feed_url)
-latest = feed.entries[0]
-video_id = latest.yt_videoid
-video_title = latest.title
-video_link = latest.link
+# 1. Buscar el video más reciente que NO sea live
+search_url = "https://www.googleapis.com/youtube/v3/search"
+params = {
+    "key": API_KEY,
+    "channelId": CHANNEL_ID,
+    "part": "snippet",
+    "order": "date",
+    "maxResults": 5,
+    "type": "video"
+}
+resp = requests.get(search_url, params=params).json()
 
-# Leer el último video ya notificado
+video = None
+for item in resp.get("items", []):
+    if item["snippet"]["liveBroadcastContent"] == "none":
+        video = item
+        break
+
+if video is None:
+    print("No se encontró video sin ser live")
+    exit()
+
+video_id = video["id"]["videoId"]
+video_title = video["snippet"]["title"]
+video_link = f"https://www.youtube.com/watch?v={video_id}"
+
+# 2. Comparar con el último notificado
 last_video = ""
 if os.path.exists(LAST_VIDEO_FILE):
     with open(LAST_VIDEO_FILE, "r") as f:
